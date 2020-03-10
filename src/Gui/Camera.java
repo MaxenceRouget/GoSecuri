@@ -12,6 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 
 public class Camera extends JFrame {
 
@@ -88,6 +89,9 @@ public class Camera extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                File file = new File("./test.jpg");
+                Imgcodecs.imwrite(file.getPath(), frame);
+
                 myThread.runnable = false;
                 button2.setEnabled(false);
                 startButtonTEST.setEnabled(true);
@@ -95,7 +99,9 @@ public class Camera extends JFrame {
         });
     }
 
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
+    public boolean IsAuth(File file){
+
+
+        return false;
     }
 }
