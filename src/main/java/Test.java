@@ -5,6 +5,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Scalar;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Test {
     // Compulsory
@@ -14,6 +15,7 @@ public class Test {
         JFrame frame = new JFrame("toto");
         frame.setContentPane(new Camera().MainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(800, 800));
         frame.pack();
         frame.setVisible(true);
     }

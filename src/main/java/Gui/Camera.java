@@ -5,7 +5,6 @@ import org.opencv.core.MatOfByte;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -13,6 +12,10 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.util.Base64;
+
+import static javax.imageio.ImageIO.read;
 
 public class Camera extends JFrame {
 
@@ -33,7 +36,7 @@ public class Camera extends JFrame {
                             webSource.retrieve(frame);
                             if ( frame.empty() ) continue;
                             Imgcodecs.imencode(".bmp", frame, mem);
-                            Image im = ImageIO.read(new ByteArrayInputStream(mem.toArray()));
+                            Image im = read(new ByteArrayInputStream(mem.toArray()));
 
                             BufferedImage buff = (BufferedImage) im;
                             Graphics g = CameraPanel.getGraphics();
@@ -95,13 +98,22 @@ public class Camera extends JFrame {
                 myThread.runnable = false;
                 button2.setEnabled(false);
                 startButtonTEST.setEnabled(true);
+
+                try {
+                    var test = encodeFileToBase64Binary(file);
+                    System.out.println();
+                    System.out.println(test);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
     }
 
-    public boolean IsAuth(File file){
-
-
-        return false;
+    private static String encodeFileToBase64Binary(File file) throws Exception{
+        FileInputStream fileInputStreamReader = new FileInputStream(file);
+        byte[] bytes = new byte[(int)file.length()];
+        fileInputStreamReader.read(bytes);
+        return new String(Base64.getEncoder().encode(bytes),"UTF-8");
     }
 }
