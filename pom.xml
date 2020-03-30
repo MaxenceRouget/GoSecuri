@@ -13,10 +13,12 @@
         <maven.compiler.target>13</maven.compiler.target>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
         <dependency>
-            <groupId>com.github.bane73</groupId>
-            <artifactId>firebase4j</artifactId>
-            <version>-7661b48592-1</version>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>6.8.1</version>
         </dependency>
+
     </dependencies>
 </project>
