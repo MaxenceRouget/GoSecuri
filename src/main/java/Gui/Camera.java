@@ -1,11 +1,12 @@
 package Gui;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.face.EigenFaceRecognizer;
-import org.opencv.face.FaceRecognizer;
-import org.opencv.face.FisherFaceRecognizer;
+import org.opencv.face.LBPHFaceRecognizer;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -15,15 +16,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +43,8 @@ public class Camera extends JFrame {
 
     Mat frame = new Mat();
     MatOfByte mem = new MatOfByte();
+
+    public static HashMap<Integer, String> names = new HashMap<Integer, String>();
 
     class DaemonThread implements Runnable{
         protected volatile boolean runnable = false;
@@ -147,7 +148,60 @@ public class Camera extends JFrame {
         }
         return filesKnow;
     }
+    public static void MyTest(){
+        File root = new File("./img/Know");
 
+
+        FilenameFilter imgFilter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                name = name.toLowerCase();
+                return name.endsWith(".jpg");
+            }
+        };
+
+        File[] imageFiles = root.listFiles(imgFilter);
+
+        List<Mat> images = new ArrayList<Mat>();
+
+        System.out.println("THE NUMBER OF IMAGES READ IS: " + imageFiles.length);
+
+        List<Integer> trainingLabels = new ArrayList<>();
+
+        Mat labels = new Mat(imageFiles.length,1, CvType.CV_32SC1);
+
+        int counter = 0;
+
+        for (File image : imageFiles) {
+            // Parse the training set folder files
+            Mat img = Imgcodecs.imread(image.getAbsolutePath());
+            // Change to Grayscale and equalize the histogram
+            Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.equalizeHist(img, img);
+            // Extract label from the file name
+            int label = Integer.parseInt(image.getName().split("\\-")[0]);
+            // Extract name from the file name and add it to names HashMap
+            String labnname = image.getName().split("\\_")[0];
+            String name = labnname.split("\\-")[1];
+            names.put(label, name);
+            // Add training set images to images Mat
+            images.add(img);
+
+            labels.put(counter, 0, label);
+            counter++;
+        }
+        LBPHFaceRecognizer model = LBPHFaceRecognizer.create();
+        //EigenFaceRecognizer model = EigenFaceRecognizer.create();
+        model.train(images, labels);
+        model.save("MyTrainnedData");
+
+        Mat fileUnKnow = new Mat();
+        fileUnKnow = Imgcodecs.imread("./img/Unknow/What.jpg");
+        Imgproc.cvtColor(fileUnKnow, fileUnKnow,Imgproc.COLOR_BGR2GRAY);
+        Imgproc.equalizeHist(fileUnKnow, fileUnKnow);
+
+        int predict = model.predict_label(fileUnKnow);
+        System.out.println("Predict : " + predict);
+    }
 
     public static void Reconizer(){
         List<String> filesKnow = ListFile("./img/Know");
@@ -193,6 +247,7 @@ public class Camera extends JFrame {
         frame.setPreferredSize(new Dimension(800, 800));
         frame.pack();
         frame.setVisible(true);*/
-        Reconizer();
+        //Reconizer();
+        MyTest();
     }
 }
