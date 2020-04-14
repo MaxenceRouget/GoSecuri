@@ -1,12 +1,10 @@
 package Gui;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.face.EigenFaceRecognizer;
+import org.opencv.core.*;
 import org.opencv.face.LBPHFaceRecognizer;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -17,20 +15,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static javax.imageio.ImageIO.read;
 
 public class Camera extends JFrame {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+    private int absoluteFaceSize;
+    private CascadeClassifier faceCascade;
 
     private JPanel MainPanel;
     private JButton startButtonTEST;
@@ -38,7 +33,6 @@ public class Camera extends JFrame {
     private JPanel CameraPanel;
 
     private DaemonThread myThread = null;
-    int count = 0;
     VideoCapture webSource = null;
 
     Mat frame = new Mat();
@@ -104,6 +98,9 @@ public class Camera extends JFrame {
         });*/
 
         //Run on lunch
+
+        this.faceCascade = new CascadeClassifier();
+
         webSource =new VideoCapture(0);
         myThread = new DaemonThread();
         Thread t = new Thread(myThread);
@@ -117,7 +114,7 @@ public class Camera extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                File file = new File("/Users/maxencerouget/Desktop/OpencvPython/img/Unknow/What.jpg");
+                File file = new File("./img/Unknow/What.jpg");
                 Imgcodecs.imwrite(file.getPath(), frame);
 
                 myThread.runnable = false;
@@ -131,31 +128,20 @@ public class Camera extends JFrame {
                 }
                 myThread.runnable = true;
                 button2.setEnabled(true);
+                Reconnize();
 
             }
         });
     }
 
-    public static List<String> ListFile(String pathToFolder){
-        List<String> filesKnow = new ArrayList<String>();
-
-        try (Stream<Path> walk = Files.walk(Paths.get(pathToFolder))) {
-
-            filesKnow = walk.filter(Files::isRegularFile)
-                    .map(x -> x.toString()).collect(Collectors.toList());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return filesKnow;
-    }
-    public static void MyTest(){
+    public static void Reconnize(){
         File root = new File("./img/Know");
 
 
         FilenameFilter imgFilter = new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 name = name.toLowerCase();
-                return name.endsWith(".jpg");
+                return name.endsWith(".png");
             }
         };
 
@@ -165,32 +151,24 @@ public class Camera extends JFrame {
 
         System.out.println("THE NUMBER OF IMAGES READ IS: " + imageFiles.length);
 
-        List<Integer> trainingLabels = new ArrayList<>();
-
         Mat labels = new Mat(imageFiles.length,1, CvType.CV_32SC1);
 
         int counter = 0;
 
         for (File image : imageFiles) {
-            // Parse the training set folder files
             Mat img = Imgcodecs.imread(image.getAbsolutePath());
-            // Change to Grayscale and equalize the histogram
             Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2GRAY);
             Imgproc.equalizeHist(img, img);
-            // Extract label from the file name
             int label = Integer.parseInt(image.getName().split("\\-")[0]);
-            // Extract name from the file name and add it to names HashMap
             String labnname = image.getName().split("\\_")[0];
             String name = labnname.split("\\-")[1];
             names.put(label, name);
-            // Add training set images to images Mat
             images.add(img);
 
             labels.put(counter, 0, label);
             counter++;
         }
         LBPHFaceRecognizer model = LBPHFaceRecognizer.create();
-        //EigenFaceRecognizer model = EigenFaceRecognizer.create();
         model.train(images, labels);
         model.save("MyTrainnedData");
 
@@ -199,31 +177,65 @@ public class Camera extends JFrame {
         Imgproc.cvtColor(fileUnKnow, fileUnKnow,Imgproc.COLOR_BGR2GRAY);
         Imgproc.equalizeHist(fileUnKnow, fileUnKnow);
 
+        model.read("MyTrainnedData");
         int predict = model.predict_label(fileUnKnow);
-        System.out.println("Predict : " + predict);
+        System.out.println("Le nom de la personne est : "+ names.get(predict));
     }
 
-    public static void Reconizer(){
-        List<String> filesKnow = ListFile("./img/Know");
-        List<String> filesUnKnow = ListFile("./img/Unknow");
-        List<Mat> MatUnKnow = new ArrayList<Mat>();
-        Mat fileKnow = new Mat();
-        Mat fileToCompare = new Mat();
+    private void detectAndDisplay(Mat frame) {
+        MatOfRect faces = new MatOfRect();
+        Mat grayFrame = new Mat();
 
-        for(var path : filesKnow){
-            fileKnow = Imgcodecs.imread(path);
-        }
-        for(var path : filesUnKnow){
-            Mat matTemp = Imgcodecs.imread(path);
-            MatUnKnow.add(matTemp);
+        // convert the frame in gray scale
+        Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
+        // equalize the frame histogram to improve the result
+        Imgproc.equalizeHist(grayFrame, grayFrame);
+
+        // compute minimum face size (20% of the frame height, in our case)
+        if (this.absoluteFaceSize == 0) {
+            int height = grayFrame.rows();
+            if (Math.round(height * 0.2f) > 0) {
+                this.absoluteFaceSize = Math.round(height * 0.2f);
+            }
         }
 
-        EigenFaceRecognizer model = EigenFaceRecognizer.create();
-        model.train(MatUnKnow, fileKnow);
-        fileToCompare = Imgcodecs.imread("./img/Unknow/What.jpg");
-        int predict = model.predict_label(fileToCompare);
-        var test = "testy";
-    }
+        // detect faces
+        this.faceCascade.detectMultiScale(grayFrame, faces, 1.1, 2, 0 | Objdetect.CASCADE_SCALE_IMAGE,
+                new Size(this.absoluteFaceSize, this.absoluteFaceSize), new Size());
+
+        // each rectangle in faces is a face: draw them!
+        Rect[] facesArray = faces.toArray();
+        for (int i = 0; i < facesArray.length; i++) {
+            Imgproc.rectangle(frame, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0), 3);
+
+            // Crop the detected faces
+            Rect rectCrop = new Rect(facesArray[i].tl(), facesArray[i].br());
+            Mat croppedImage = new Mat(frame, rectCrop);
+            // Change to gray scale
+            Imgproc.cvtColor(croppedImage, croppedImage, Imgproc.COLOR_BGR2GRAY);
+            // Equalize histogram
+            Imgproc.equalizeHist(croppedImage, croppedImage);
+            // Resize the image to a default size
+            Mat resizeImage = new Mat();
+            Size size = new Size(250, 250);
+            Imgproc.resize(croppedImage, resizeImage, size);
+            Imgcodecs.imwrite("" +
+                    "Maxence"+ Math.random()+".jpg", resizeImage);
+                }
+//			int prediction = faceRecognition(resizeImage);
+        /*    double[] returnedResults = faceRecognition(resizeImage);
+            double prediction = returnedResults[0];
+            double confidence = returnedResults[1];
+
+//			System.out.println("PREDICTED LABEL IS: " + prediction);
+            int label = (int) prediction;
+            String name = "";
+            if (names.containsKey(label)) {
+                name = names.get(label);
+            } else {
+                name = "Unknown";
+            }*/
+        }
 
     private static String encodeFileToBase64Binary(File file) throws Exception{
         FileInputStream fileInputStreamReader = new FileInputStream(file);
@@ -241,13 +253,12 @@ public class Camera extends JFrame {
     }
 
     public static void main(String[] args) {
-/*        JFrame frame = new JFrame("GoSecuriApp");
+      /*  JFrame frame = new JFrame("GoSecuriApp");
         frame.setContentPane(new Camera().MainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(800, 800));
         frame.pack();
         frame.setVisible(true);*/
-        //Reconizer();
-        MyTest();
+      Reconnize();
     }
 }
