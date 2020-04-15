@@ -44,7 +44,6 @@ public class FireBaseAccess {
      for(DocumentSnapshot doc : documents){
          System.out.println(doc.getData());
      }
-
      return true;
     }
  }

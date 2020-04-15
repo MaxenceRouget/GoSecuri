@@ -160,7 +160,7 @@ public class Camera extends JFrame {
         model.save("MyTrainnedData");
 
         Mat fileUnKnow = new Mat();
-        fileUnKnow = Imgcodecs.imread("./img/Unknow/What2.jpg");
+        fileUnKnow = Imgcodecs.imread("./img/Unknow/What2.png");
         Imgproc.cvtColor(fileUnKnow, fileUnKnow,Imgproc.COLOR_BGR2GRAY);
         Imgproc.equalizeHist(fileUnKnow, fileUnKnow);
 
@@ -178,7 +178,7 @@ public class Camera extends JFrame {
         byte[] bar = Base64.getDecoder().decode(fileStringed.getBytes());
         ByteArrayInputStream bis = new ByteArrayInputStream(bar);
         BufferedImage bImage2 = ImageIO.read(bis);
-        ImageIO.write(bImage2, "jpg", new File("./output.jpg") );
+        ImageIO.write(bImage2, "png", new File("./output.png") );
         System.out.println("image created");
 
     }
