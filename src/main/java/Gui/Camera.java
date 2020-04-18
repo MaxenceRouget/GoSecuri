@@ -17,9 +17,12 @@ import org.opencv.imgcodecs.Imgcodecs;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.TileObserver;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -31,10 +34,12 @@ import static javax.imageio.ImageIO.read;
 public class Camera extends JFrame {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     private static JFrame frame = new JFrame("GoSecuriApp");
-
+    FireBaseAccess fireBaseAccess = FireBaseAccess.getInstance(); //Singleton
     private static User userAuth;
-    private static int idUser;
+    private static long idUser;
 
+    private List<JCheckBox> checkBoxes = new ArrayList<>();
+    private List<Tools> tools = new ArrayList<>();
     private CascadeClassifier faceCascade;
     CascadeClassifier eyesCascade;
 
@@ -106,8 +111,24 @@ public class Camera extends JFrame {
             }
         }
     }
-
+    public void AddCheckBoxInList(){
+        checkBoxes.add(cb1);
+        checkBoxes.add(cb2);
+        checkBoxes.add(cb3);
+        checkBoxes.add(cb4);
+        checkBoxes.add(cb5);
+        checkBoxes.add(cb6);
+        checkBoxes.add(cb7);
+        checkBoxes.add(cb8);
+        checkBoxes.add(cb9);
+        checkBoxes.add(cb10);
+        checkBoxes.add(cb11);
+        checkBoxes.add(cb12);
+        checkBoxes.add(cb13);
+        checkBoxes.add(cb14);
+    }
     public Camera() {
+        AddCheckBoxInList();
         this.faceCascade = new CascadeClassifier();
 
         String fileFace = "data/haarcascades/haarcascade_frontalface_alt.xml";
@@ -208,23 +229,6 @@ public class Camera extends JFrame {
         JPanel ManagerFormPanel = new JPanel();
         ManagerFormPanel.setLayout(new GridLayout(5,3));
         frame.setContentPane(ManagerFormPanel);
-        ManagerFormPanel.add(back);
-        ManagerFormPanel.add(cb1);
-        ManagerFormPanel.add(cb2);
-        ManagerFormPanel.add(cb3);
-        ManagerFormPanel.add(cb4);
-        ManagerFormPanel.add(cb5);
-        ManagerFormPanel.add(cb6);
-        ManagerFormPanel.add(cb7);
-        ManagerFormPanel.add(cb8);
-        ManagerFormPanel.add(cb9);
-        ManagerFormPanel.add(cb10);
-        ManagerFormPanel.add(cb11);
-        ManagerFormPanel.add(cb12);
-        ManagerFormPanel.add(cb13);
-        ManagerFormPanel.add(cb14);
-        ManagerFormPanel.setVisible(true);
-
         back.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -234,10 +238,53 @@ public class Camera extends JFrame {
                 But_Ident.setEnabled(true);
                 CameraPanel.setVisible(true);
                 myThread.runnable = true;
-            }
-        });
-    }
+            }});
 
+        try {
+            var listData = fireBaseAccess.GetDataForTools();
+            for (var document : listData){
+                for (var checkBox : checkBoxes){
+                    var test = document.getId();
+                    var test2 = checkBox.getText();
+                    int A =1;
+                    if(document.getId().equals(checkBox.getText())){
+                        tools.add(new Tools(checkBox.getText(),(ArrayList) document.get("Owner"),
+                                (long)document.get("Total"),(long)document.get("Used")));
+                    }
+                }
+            }
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        var test = idUser;
+
+        checkCheckBox();
+        for(var checkBox : checkBoxes){
+            ManagerFormPanel.add(checkBox);
+        }
+        ManagerFormPanel.setVisible(true);
+    }
+    private void checkCheckBox(){
+        for(var box : checkBoxes) {
+            int a = 1;
+            for(var tool : tools){
+                if(box.getText().equals(tool.getName())){
+                    if(tool.getOwner().contains(idUser)){
+                        box.setEnabled(true);
+                        box.setSelected(true);
+                    }
+                    else if(!tool.getOwner().contains(idUser) && tool.getUsed() == tool.getTotal()){
+                        box.setEnabled(false);
+                    }
+                    else if(!tool.getOwner().contains(idUser) && tool.getUsed() < tool.getTotal()){
+                        box.setEnabled(true);
+                        box.setSelected(false);
+                    }
+                }
+            }
+        }
+    }
     public static void main(String[] args) throws IOException {
         frame.setContentPane(new Camera().MainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
