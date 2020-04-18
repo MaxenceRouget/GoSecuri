@@ -217,8 +217,6 @@ public class Camera extends JFrame {
             double[] confidence = new double[1];
 
             model.predict(fileUnKnow,predLabel,confidence);
-            var result = predLabel[0];
-            var conf = confidence[0];
             System.out.println("Confidence : " + confidence[0]);
             if(confidence[0] < 36.50) {
                 idUser = predict;
