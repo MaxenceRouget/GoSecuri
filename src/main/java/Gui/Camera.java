@@ -3,18 +3,13 @@ package Gui;
 import FireBase.FireBaseAccess;
 import Model.Tools;
 import Model.User;
-import Utils.Utils;
-import com.google.firebase.database.*;
-import com.sun.tools.javac.Main;
 import org.opencv.core.*;
 import org.opencv.face.LBPHFaceRecognizer;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.objdetect.Objdetect;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -22,10 +17,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.TileObserver;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
@@ -159,8 +152,12 @@ public class Camera extends JFrame {
                         MainPanel.setVisible(false);
                         InitManageForm();
                     }else{
-                        But_Ident.setEnabled(true);
+                        But_Ident.setText("Retry");
+                        frame.setContentPane(new Camera().MainPanel);
+                        CameraPanel.setVisible(true);
                         myThread.runnable = true;
+                        But_Ident.setEnabled(true);
+
                     }
                 }
             }
@@ -218,9 +215,19 @@ public class Camera extends JFrame {
 
             model.read("MyTrainnedData");
             int predict = model.predict_label(fileUnKnow);
+            int[] predLabel = new int[1];
+            double[] confidence = new double[1];
+
+            model.predict(fileUnKnow,predLabel,confidence);
+            var result = predLabel[0];
+            var conf = confidence[0];
             System.out.println("Le nom de la personne est : " + names.get(predict) + " Son id est " + predict);
             idUser = predict;
-            return true;
+            System.out.println("Confidence : " + confidence[0]);
+            if(confidence[0] < 35.50)
+                return true;
+            else
+                return false;
         }catch (Exception e){
             return false;
         }
@@ -267,7 +274,6 @@ public class Camera extends JFrame {
         }
         ManagerFormPanel.setVisible(true);
     }
-
     private void checkCheckBox(){
         for(var box : checkBoxes) {
             int a = 1;
