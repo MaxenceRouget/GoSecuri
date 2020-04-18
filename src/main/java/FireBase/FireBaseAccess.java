@@ -1,5 +1,6 @@
 package FireBase;
 
+import Model.Tools;
 import Model.User;
 import Utils.Utils;
 import com.google.api.core.ApiFuture;
@@ -11,10 +12,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class FireBaseAccess {
@@ -86,6 +84,18 @@ public class FireBaseAccess {
         }
         catch (Exception e){
             return null;
+        }
+    }
+    public boolean SendToolSelected(Tools tool){
+        try{
+            Map<String, Object> docData = new HashMap<>();
+            docData.put("Total", tool.getTotal());
+            docData.put("Used", tool.getUsed());
+            docData.put("Owner", tool.getOwner());
+            ApiFuture<WriteResult> future = db.collection("Tools").document(tool.getName()).set(docData);
+            return true;
+        }catch (Exception e){
+            return false;
         }
     }
 }

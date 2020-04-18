@@ -229,6 +229,7 @@ public class Camera extends JFrame {
         JPanel ManagerFormPanel = new JPanel();
         ManagerFormPanel.setLayout(new GridLayout(5,3));
         frame.setContentPane(ManagerFormPanel);
+        ManagerFormPanel.add(back);
         back.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -260,11 +261,13 @@ public class Camera extends JFrame {
         var test = idUser;
 
         checkCheckBox();
+        initListener();
         for(var checkBox : checkBoxes){
             ManagerFormPanel.add(checkBox);
         }
         ManagerFormPanel.setVisible(true);
     }
+
     private void checkCheckBox(){
         for(var box : checkBoxes) {
             int a = 1;
@@ -285,6 +288,55 @@ public class Camera extends JFrame {
             }
         }
     }
+    private void initListener() {
+        for (var box : checkBoxes) {
+            box.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (box.isSelected()) {
+                        SelectItem(box.getText());
+                    } else {
+                        UnSelectItem(box.getText());
+                    }
+                }
+            });
+        }
+    }
+    private void SelectItem(String nameBox){
+        Tools tool = new Tools();
+        for(var toolSected : tools){
+            if(toolSected.getName().equals(nameBox)){
+                tool = toolSected;
+            }
+        }
+        ArrayList owners = tool.getOwner();
+        owners.add(idUser);
+        tool.setOwner(owners);
+
+        tool.setUsed(tool.getUsed() + 1);
+        boolean isUpdate = fireBaseAccess.SendToolSelected(tool);
+        if(!isUpdate){
+            System.out.println("an error as occured");
+        }
+    }
+    private void UnSelectItem(String nameBox){
+        Tools tool = new Tools();
+        for(var toolSected : tools){
+            if(toolSected.getName().equals(nameBox)){
+                tool = toolSected;
+            }
+        }
+        ArrayList owners = tool.getOwner();
+        owners.remove(idUser);
+        tool.setOwner(owners);
+
+        tool.setUsed(tool.getUsed() - 1);
+        boolean isUpdate = fireBaseAccess.SendToolSelected(tool);
+        if(!isUpdate){
+            System.out.println("an error as occured");
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         frame.setContentPane(new Camera().MainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
