@@ -2,7 +2,6 @@ package Gui;
 
 import FireBase.FireBaseAccess;
 import Model.Tools;
-import Model.User;
 import org.opencv.core.*;
 import org.opencv.face.LBPHFaceRecognizer;
 import org.opencv.imgproc.Imgproc;
@@ -28,7 +27,6 @@ public class Camera extends JFrame {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     private static JFrame frame = new JFrame("GoSecuriApp");
     FireBaseAccess fireBaseAccess = FireBaseAccess.getInstance(); //Singleton
-    private static User userAuth;
     private static long idUser;
 
     private List<JCheckBox> checkBoxes = new ArrayList<>();
@@ -147,7 +145,7 @@ public class Camera extends JFrame {
                 Imgcodecs.imwrite(file.getPath(), currentFrame);
                 if(detectFace(currentFrame)){
                     myThread.runnable = false;
-                    if(Reconnize())
+                    if(Recognize())
                     {
                         MainPanel.setVisible(false);
                         InitManageForm();
@@ -176,7 +174,7 @@ public class Camera extends JFrame {
         }
         return false;
     }
-    public static boolean Reconnize(){
+    public static boolean Recognize(){
         try {
             File root = new File("./img/Know");
             FilenameFilter imgFilter = new FilenameFilter() {
@@ -221,11 +219,11 @@ public class Camera extends JFrame {
             model.predict(fileUnKnow,predLabel,confidence);
             var result = predLabel[0];
             var conf = confidence[0];
-            System.out.println("Le nom de la personne est : " + names.get(predict) + " Son id est " + predict);
-            idUser = predict;
             System.out.println("Confidence : " + confidence[0]);
-            if(confidence[0] < 35.50)
+            if(confidence[0] < 36.50) {
+                idUser = predict;
                 return true;
+            }
             else
                 return false;
         }catch (Exception e){
@@ -342,7 +340,6 @@ public class Camera extends JFrame {
             System.out.println("an error as occured");
         }
     }
-
     public static void main(String[] args) throws IOException {
         frame.setContentPane(new Camera().MainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

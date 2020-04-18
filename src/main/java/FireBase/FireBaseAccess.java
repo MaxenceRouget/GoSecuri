@@ -1,8 +1,6 @@
 package FireBase;
 
 import Model.Tools;
-import Model.User;
-import Utils.Utils;
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
@@ -13,7 +11,6 @@ import com.google.firebase.cloud.FirestoreClient;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 public class FireBaseAccess {
     private static final FireBaseAccess instance = new FireBaseAccess();
@@ -42,19 +39,6 @@ public class FireBaseAccess {
         this.db = FirestoreClient.getFirestore();
     }
 
-    public boolean GetDataFromDatabase() throws ExecutionException, InterruptedException {
-     CollectionReference users = db.collection("Users");
-     Query query = users.orderBy("name");
-     ApiFuture<QuerySnapshot> querySnapshot = query.get();
-     List<DocumentSnapshot> documents = new ArrayList<DocumentSnapshot>();
-     for(DocumentSnapshot document : querySnapshot.get().getDocuments()){
-         documents.add(document);
-     }
-     for(DocumentSnapshot doc : documents){
-         System.out.println(doc.getData());
-     }
-     return true;
-    }
     public void addToDb(String name, String file){
         try{
             Map<String, Object> update = new HashMap<>();
