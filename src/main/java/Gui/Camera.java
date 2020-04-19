@@ -62,6 +62,17 @@ public class Camera extends JFrame {
 
     public static HashMap<Integer, String> names = new HashMap<Integer, String>();
 
+    private void init(){
+        File directoryImg = new File("./img");
+        if(!directoryImg.exists()){
+            File root = new File("./img");
+            File newDirectory = new File("./img/Know");
+            File newDirectoryUn = new File("./img/Unknow");
+            root.mkdir();
+            directoryImg.mkdir();
+            newDirectoryUn.mkdir();
+        }
+    }
     class DaemonThread implements Runnable{
         protected volatile boolean runnable = false;
 
@@ -102,7 +113,7 @@ public class Camera extends JFrame {
             }
         }
     }
-    public void AddCheckBoxInList(){
+    private void AddCheckBoxInList(){
         checkBoxes.add(cb1);
         checkBoxes.add(cb2);
         checkBoxes.add(cb3);
@@ -118,7 +129,7 @@ public class Camera extends JFrame {
         checkBoxes.add(cb13);
         checkBoxes.add(cb14);
     }
-    public Camera() {
+    private Camera() {
         AddCheckBoxInList();
         this.faceCascade = new CascadeClassifier();
 
@@ -135,7 +146,7 @@ public class Camera extends JFrame {
         t.setDaemon(true);
         myThread.runnable = true;
         t.start();
-        But_Ident.setEnabled(true);  //IndentificationButton button
+        But_Ident.setEnabled(true);  //Indentification Button button
 
         But_Ident.addMouseListener(new MouseAdapter() {
             @Override
@@ -161,8 +172,7 @@ public class Camera extends JFrame {
             }
         });
     }
-
-    public boolean detectFace(Mat frame){
+    private boolean detectFace(Mat frame){
         MatOfRect faces = new MatOfRect();
         faceCascade.detectMultiScale(frame, faces);
         if(faces.toArray().length > 0) {
@@ -174,7 +184,7 @@ public class Camera extends JFrame {
         }
         return false;
     }
-    public static boolean Recognize(){
+    private static boolean Recognize(){
         try {
             File root = new File("./img/Know");
             FilenameFilter imgFilter = new FilenameFilter() {
@@ -228,7 +238,7 @@ public class Camera extends JFrame {
             return false;
         }
     }
-    public void InitManageForm(){
+    private void InitManageForm(){
         JPanel ManagerFormPanel = new JPanel();
         ManagerFormPanel.setLayout(new GridLayout(5,3));
         frame.setContentPane(ManagerFormPanel);
@@ -338,6 +348,7 @@ public class Camera extends JFrame {
             System.out.println("an error as occured");
         }
     }
+
     public static void main(String[] args) throws IOException {
         frame.setContentPane(new Camera().MainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
