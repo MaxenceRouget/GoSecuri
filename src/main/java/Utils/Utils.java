@@ -15,11 +15,11 @@ public abstract class Utils {
         fileInputStreamReader.read(bytes);
         return new String(Base64.getEncoder().encode(bytes),"UTF-8");
     }
-    public static void decodeFileFromBase64Binary(String fileStringed, String nameFile) throws IOException {
+    public static void decodeFileFromBase64Binary(String fileStringed, String nameFile,String Path) throws IOException {
         byte[] bar = Base64.getDecoder().decode(fileStringed.getBytes());
         ByteArrayInputStream bis = new ByteArrayInputStream(bar);
         BufferedImage bImage2 = ImageIO.read(bis);
-        ImageIO.write(bImage2, "png", new File("./img/Unknow/"+nameFile) );
+        ImageIO.write(bImage2, "png", new File(Path+"/"+nameFile) );
         System.out.println("image created");
 
     }

@@ -2,6 +2,7 @@ package Gui;
 
 import FireBase.FireBaseAccess;
 import Model.Tools;
+import Utils.Utils;
 import org.opencv.core.*;
 import org.opencv.face.LBPHFaceRecognizer;
 import org.opencv.imgproc.Imgproc;
@@ -20,6 +21,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static javax.imageio.ImageIO.read;
 
@@ -63,14 +65,26 @@ public class Camera extends JFrame {
     public static HashMap<Integer, String> names = new HashMap<Integer, String>();
 
     private void init(){
-        File directoryImg = new File("./img");
-        if(!directoryImg.exists()){
-            File root = new File("./img");
-            File newDirectory = new File("./img/Know");
-            File newDirectoryUn = new File("./img/Unknow");
-            root.mkdir();
-            directoryImg.mkdir();
-            newDirectoryUn.mkdir();
+        try{
+            File directoryImg = new File("./img");
+            if(!directoryImg.exists()){
+                File root = new File("./img");
+                File newDirectory = new File("./img/Know");
+                File newDirectoryUn = new File("./img/Unknow");
+                root.mkdir();
+                directoryImg.mkdir();
+                newDirectory.mkdir();
+                newDirectoryUn.mkdir();
+            }
+            var photooo = fireBaseAccess.GetPhoto();
+            for (Map.Entry<String, Object> photo: photooo.entrySet()){
+                File fileChecking = new File("./img/Know/"+photo.getKey());
+                if(!fileChecking.exists())
+                    Utils.decodeFileFromBase64Binary((String) photo.getValue(),photo.getKey()
+                            ,"./img/Know");
+            }
+        }catch (Exception e){
+            System.out.println("Error Init");
         }
     }
     class DaemonThread implements Runnable{
@@ -130,6 +144,7 @@ public class Camera extends JFrame {
         checkBoxes.add(cb14);
     }
     private Camera() {
+        init();
         AddCheckBoxInList();
         this.faceCascade = new CascadeClassifier();
 

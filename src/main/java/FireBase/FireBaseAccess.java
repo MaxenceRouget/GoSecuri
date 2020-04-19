@@ -53,7 +53,19 @@ public class FireBaseAccess {
 
         }
     }
-
+    public Map<String, Object> GetPhoto(){
+        Map<String, Object> photos = new HashMap<>();
+        try{
+            CollectionReference photoDb = db.collection("User");
+            ApiFuture<QuerySnapshot> querySnapshot = photoDb.get();
+            for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
+                photos = document.getData();
+            }
+            return photos;
+        }catch (Exception e){
+            return null;
+        }
+    }
     public List<DocumentSnapshot> GetDataForTools(){
         try {
             CollectionReference tools = db.collection("Tools");
