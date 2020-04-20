@@ -64,7 +64,7 @@ public class Camera extends JFrame {
 
     public static HashMap<Integer, String> names = new HashMap<Integer, String>();
 
-    private void init(){
+    public void init(){
         try{
             File directoryImg = new File("./img");
             if(!directoryImg.exists()){
@@ -143,7 +143,7 @@ public class Camera extends JFrame {
         checkBoxes.add(cb13);
         checkBoxes.add(cb14);
     }
-    private Camera() {
+    Camera() {
         init();
         AddCheckBoxInList();
         this.faceCascade = new CascadeClassifier();
