@@ -29,6 +29,7 @@ public class Camera extends JFrame {
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
     private static JFrame frame = new JFrame("GoSecuriApp");
     FireBaseAccess fireBaseAccess = FireBaseAccess.getInstance(); //Singleton
+    JOptionPane errorFaceReco;
     private static long idUser;
 
     public List<JCheckBox> checkBoxes = new ArrayList<>();
@@ -143,7 +144,7 @@ public class Camera extends JFrame {
         checkBoxes.add(cb13);
         checkBoxes.add(cb14);
     }
-    Camera() {
+    public Camera() {
         init();
         AddCheckBoxInList();
         this.faceCascade = new CascadeClassifier();
@@ -176,6 +177,8 @@ public class Camera extends JFrame {
                         MainPanel.setVisible(false);
                         InitManageForm();
                     }else{
+                        errorFaceReco = new JOptionPane();
+                        errorFaceReco.showMessageDialog(MainPanel, "Tête non reconnue", "Error", JOptionPane.ERROR_MESSAGE);
                         But_Ident.setText("Retry");
                         frame.setContentPane(new Camera().MainPanel);
                         CameraPanel.setVisible(true);
