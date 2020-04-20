@@ -31,7 +31,7 @@ public class Camera extends JFrame {
     FireBaseAccess fireBaseAccess = FireBaseAccess.getInstance(); //Singleton
     private static long idUser;
 
-    private List<JCheckBox> checkBoxes = new ArrayList<>();
+    public List<JCheckBox> checkBoxes = new ArrayList<>();
     private List<Tools> tools = new ArrayList<>();
     private CascadeClassifier faceCascade;
     CascadeClassifier eyesCascade;
@@ -127,7 +127,7 @@ public class Camera extends JFrame {
             }
         }
     }
-    private void AddCheckBoxInList(){
+    public void AddCheckBoxInList(){
         checkBoxes.add(cb1);
         checkBoxes.add(cb2);
         checkBoxes.add(cb3);

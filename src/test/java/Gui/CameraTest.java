@@ -4,14 +4,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class CameraTest {
     File directoryImg = new File("./img");
+    Camera cam = new Camera();
 
-    @BeforeEach
     void setUp() {
         if(!directoryImg.exists()) {
             File newDirectory = new File("./img4");
@@ -20,7 +23,6 @@ class CameraTest {
         }
     }
 
-    @AfterEach
     void tearDown() {
         if(!directoryImg.exists()) {
             File newDirectory = new File("./img4");
@@ -31,10 +33,16 @@ class CameraTest {
 
     @Test
     void init() {
-        Camera cam = new Camera();
+        setUp();
         cam.init();
         boolean directoryExist = directoryImg.exists();
-        assertEquals(true, directoryExist);
-
+        assertTrue(directoryExist);
+        tearDown();
+    }
+    @Test
+    void addCheckboxes(){
+       List<JCheckBox> listToAssert;
+       listToAssert = cam.checkBoxes;
+       assertEquals(14,listToAssert.size());
     }
 }
